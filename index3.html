@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>tonlager — Dossier</title>
+<meta name="description" content="tonlager — юный разработчик и энтузиаст в The Open Network. Capsule, Octopus и контакты.">
+<style>
+/* ============================
+   FONT - поменяй пути при надобности
+   Положи Inter-Regular.woff2, Inter-Medium.woff2, Inter-SemiBold.woff2 рядом с этим файлом
+   ============================ */
+@font-face {
+  font-family: 'InterCustom';
+  src: url('./Inter-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'InterCustom';
+  src: url('./Inter-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'InterCustom';
+  src: url('./Inter-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Reset & base */
+:root{
+  --bg-1: #05060a;
+  --glass: rgba(255,255,255,0.06);
+  --glass-2: rgba(255,255,255,0.04);
+  --accent-a: 70 200 255; /* cyan-ish H S L not using HSL due to filters */
+  --accent-b: 190 80 255; /* purple-ish */
+  --text: rgba(255,255,255,0.95);
+  --muted: rgba(255,255,255,0.6);
+  --glass-border: rgba(255,255,255,0.12);
+  --shadow: 0 10px 30px rgba(2,6,23,0.6);
+  --radius-lg: 18px;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{
+  margin:0;
+  font-family: InterCustom, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(30,18,60,0.35), transparent 8%),
+              radial-gradient(900px 400px at 90% 90%, rgba(5,20,60,0.4), transparent 10%),
+              var(--bg-1);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  -webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Canvas starfield covers whole screen */
+#space {
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+
+/* Nebula layer (animated gradient) */
+.nebula {
+  position:fixed;
+  inset: -20% -20%;
+  z-index:0;
+  background:
+    radial-gradient(40% 30% at 10% 20%, rgba(80,0,200,0.12), transparent 10%),
+    radial-gradient(50% 40% at 80% 80%, rgba(0,180,255,0.08), transparent 12%),
+    radial-gradient(25% 18% at 60% 30%, rgba(200,60,255,0.06), transparent 10%);
+  filter: blur(40px) saturate(120%);
+  transform: translateZ(0);
+  animation: neb 18s linear infinite alternate;
+}
+@keyframes neb {
+  from { transform: translate(-2%, -1%) scale(1); }
+  to   { transform: translate(2%, 1%) scale(1.06); }
+}
+
+/* Layout container */
+.container{
+  position:relative;
+  z-index:2;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  gap:48px;
+  padding:40px clamp(18px,6vw,64px);
+  align-items:center;
+  justify-content:flex-start;
+}
+
+/* Header */
+.header {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  max-width:1400px;
+  margin:0 auto;
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.brand-logo {
+  width:52px;
+  height:52px;
+  border-radius:12px;
+  background: linear-gradient(135deg, rgba(var(--accent-a),0.12), rgba(var(--accent-b),0.12));
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter: blur(6px) saturate(140%);
+  -webkit-backdrop-filter: blur(6px) saturate(140%);
+  border: 1px solid rgba(255,255,255,0.04);
+  position:relative;
+  overflow:hidden;
+}
+.brand-logo::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg, rgba(255,255,255,0.03), transparent 30%);
+  mix-blend-mode:overlay;
+}
+.brand h1{
+  font-size:18px;
+  margin:0;
+  font-weight:600;
+  letter-spacing:0.2px;
+}
+.brand p{ margin:0; font-size:12px; color:var(--muted); margin-top:2px; }
+
+/* Nav */
+.nav {
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.nav a{
+  color:var(--muted);
+  text-decoration:none;
+  font-size:14px;
+  padding:10px 12px;
+  border-radius:12px;
+  transition:all .28s cubic-bezier(.18,.9,.32,1);
+}
+.nav a.active, .nav a:hover{
+  color:var(--text);
+  transform:translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+
+/* Hero */
+.hero {
+  width:100%;
+  max-width:1300px;
+  display:grid;
+  grid-template-columns: 1fr 420px;
+  gap:30px;
+  align-items:center;
+  margin:10vh auto 0 auto;
+}
+@media (max-width:980px){
+  .hero{ grid-template-columns:1fr; margin-top:6vh; padding-bottom:30px; gap:20px; }
+}
+.hero-left {
+  color:var(--text);
+}
+.kicker {
+  display:inline-block;
+  font-size:13px;
+  color:var(--muted);
+  padding:8px 12px;
+  border-radius:999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+  border:1px solid rgba(255,255,255,0.03);
+  margin-bottom:14px;
+}
+.title {
+  font-size: clamp(28px, 4.2vw, 48px);
+  line-height:1.02;
+  margin:0 0 14px 0;
+  font-weight:600;
+  letter-spacing:-0.6px;
+  text-shadow: 0 8px 30px rgba(0,0,0,0.45);
+}
+.lead {
+  color:var(--muted);
+  font-size:16px;
+  margin:0 0 22px 0;
+  max-width:70ch;
+}
+
+/* CTA */
+.cta-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.btn {
+  border:0;
+  padding:12px 16px;
+  font-weight:600;
+  border-radius:12px;
+  cursor:pointer;
+  background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  box-shadow: var(--shadow);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.btn:active{ transform:translateY(1px) }
+.btn.primary{
+  background: linear-gradient(90deg, rgba(70,200,255,0.12), rgba(190,80,255,0.08));
+  border: 1px solid rgba(140,120,255,0.12);
+  color:white;
+  box-shadow: 0 10px 30px rgba(100,60,200,0.12);
+}
+
+/* Right card */
+.hero-right {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  perspective: 1100px;
+}
+.card {
+  width:100%;
+  max-width:420px;
+  border-radius:var(--radius-lg);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid var(--glass-border);
+  padding:22px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  transform-origin:center;
+  transition: transform .45s cubic-bezier(.18,.9,.32,1), box-shadow .45s;
+  position:relative;
+  overflow:hidden;
+}
+.card .meta { font-size:13px; color:var(--muted); margin-bottom:8px; }
+.card h3{ margin:0 0 12px 0; font-size:20px; font-weight:600; }
+.card p{ margin:0; color:var(--muted); font-size:14px; line-height:1.45; }
+
+/* Glass accent lines */
+.card::before, .card::after{
+  content:'';
+  position:absolute;
+  left:-30%;
+  width:160%;
+  height:60%;
+  top:-20%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
+  transform: rotate(-18deg);
+  pointer-events:none;
+}
+.card::after{
+  left:auto; right:-30%;
+  top:auto; bottom:-20%;
+  transform: rotate(18deg);
+  opacity:0.6;
+}
+
+/* Section layout */
+.section {
+  width:100%;
+  max-width:1200px;
+  margin:60px auto;
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:22px;
+}
+@media (max-width:980px){
+  .section { grid-template-columns: 1fr; padding:0 8px; }
+}
+.section .project {
+  border-radius:14px;
+  padding:18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 8px 30px rgba(2,6,23,0.55);
+  backdrop-filter: blur(10px);
+  transition: transform .36s cubic-bezier(.18,.9,.32,1);
+}
+.project h4{ margin:0 0 8px 0; font-size:16px; font-weight:600; }
+.project p{ margin:0 0 12px 0; color:var(--muted); font-size:14px; line-height:1.45; }
+.project .link-row { display:flex; gap:8px; align-items:center; }
+
+/* Footer/contact block */
+.contact-card{
+  max-width:900px;
+  margin:60px auto;
+  padding:20px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04);
+  display:flex;
+  gap:18px;
+  align-items:center;
+  justify-content:space-between;
+}
+@media (max-width:700px){
+  .contact-card{ flex-direction:column; align-items:stretch; gap:12px; padding:16px; }
+}
+
+/* Footer small */
+.footer {
+  margin:40px auto 120px;
+  color:var(--muted);
+  font-size:13px;
+  text-align:center;
+}
+
+/* small helpers */
+.small { font-size:13px; color:var(--muted) }
+.center { text-align:center; }
+
+/* Animations when sections appear */
+.reveal {
+  opacity:0;
+  transform:translateY(12px) scale(.995);
+  transition: opacity .7s ease, transform .7s cubic-bezier(.18,.9,.32,1);
+}
+.reveal.in { opacity:1; transform:translateY(0) scale(1); }
+
+/* subtle floating highlight */
+.float {
+  animation: floaty 6s ease-in-out infinite;
+}
+@keyframes floaty {
+  0% { transform: translateY(0) }
+  50% { transform: translateY(-10px) }
+  100% { transform: translateY(0) }
+}
+
+/* small screen tuning */
+@media (max-width:480px){
+  .brand h1{ font-size:16px }
+  .hero { padding:0; gap:16px; }
+  .card { padding:16px; border-radius:14px; }
+  .title { font-size:28px }
+}
+
+/* subtle focus ring */
+a:focus, button:focus { outline: 3px solid rgba(130,100,255,0.12); outline-offset:2px; border-radius:10px; }
+
+/* tiny decorative glowing orb */
+.orb {
+  position:absolute;
+  width:220px;
+  height:220px;
+  right:6%;
+  top:8%;
+  border-radius:50%;
+  filter: blur(40px) saturate(140%);
+  pointer-events:none;
+  z-index:1;
+  background: radial-gradient(circle at 30% 30%, rgba(70,200,255,0.16), rgba(190,80,255,0.06) 40%, transparent 60%);
+  mix-blend-mode:screen;
+  opacity:0.9;
+  transform: translateZ(0);
+}
+
+/* tiny responsive adjustments for orb */
+@media (max-width:980px){ .orb{ display:none } }
+</style>
+</head>
+<body>
+<!-- Canvas for stars -->
+<canvas id="space"></canvas>
+<div class="nebula" aria-hidden="true"></div>
+
+<div id="root" class="container">
+  <header class="header reveal in" style="--i:0;">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <!-- simple initials -->
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="22" height="22" rx="5" fill="rgba(255,255,255,0.03)"/>
+          <path d="M6 17 L10 7 L14 17" stroke="rgba(255,255,255,0.9)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div>
+        <h1>tonlager</h1>
+        <p>Developer · TON enthusiast · token holder</p>
+      </div>
+    </div>
+
+    <nav class="nav" role="navigation" aria-label="Главная навигация">
+      <a href="#home" data-target="home" class="active">Главная</a>
+      <a href="#capsule" data-target="capsule">Capsule</a>
+      <a href="#octopus" data-target="octopus">Octopus</a>
+      <a href="#contact" data-target="contact">Контакты</a>
+    </nav>
+  </header>
+
+  <main style="width:100%;">
+    <!-- HERO -->
+    <section id="home" class="hero" role="region" aria-label="Главная">
+      <div class="hero-left">
+        <div class="kicker">Dossier — The Open Network</div>
+        <h2 class="title">tonlager — юный разработчик и энтузиаст в сети The Open Network</h2>
+        <p class="lead">Ранее известный как <strong>skat</strong>. Владеет <strong>10%</strong> от токена <em>E V A A</em>. Здесь — мои проекты и способы связаться. Дизайн в стиле liquid glass + космос, с анимациями.</p>
+
+        <div class="cta-row">
+          <button class="btn primary" data-nav="capsule">О Capsule</button>
+          <button class="btn" data-nav="octopus">О Octopus</button>
+          <a class="btn" href="https://t.me/tonlager" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="card float" id="profileCard" role="article" aria-label="Профайл">
+          <div class="meta">Профиль</div>
+          <h3>tonlager — The Open Network</h3>
+          <p>Юный dev-интузиаст, строю проекты в экосистеме TON. Люблю web3, боты и рынок NFT. Держатель 10% EVAА.</p>
+          <div style="height:14px;"></div>
+          <div class="small">Кнопки справа ведут к подробным страницам.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="section" aria-label="Мои проекты">
+      <div class="project reveal" id="proj-capsule">
+        <h4>Capsule</h4>
+        <p>Capsule — быстрорастущий маркетплейс NFT-активов, интеграции с Telegram и удобными карточками для продажи и покупки.</p>
+        <div class="link-row">
+          <a class="btn" href="#capsule" data-target="capsule">Подробнее</a>
+        </div>
+      </div>
+
+      <div class="project reveal" id="proj-octopus">
+        <h4>Octopus</h4>
+        <p>Octopus — бот, получивший известность в сообществах благодаря инструментам социальной инженерии и авто-обработке запросов (форумы Endway, Lolz).</p>
+        <div class="link-row">
+          <a class="btn" href="#octopus" data-target="octopus">Подробнее</a>
+          <a class="btn" href="https://t.me/Gargona_rezerv" target="_blank" rel="noopener noreferrer">Телеграм бота</a>
+        </div>
+      </div>
+
+      <div class="project reveal" id="proj-misc">
+        <h4>Дополнительно</h4>
+        <p>Небольшие утилиты, скрипты и исследования по безопасности и автоматизации. Интеграции с Telegram API и смарт-контрактами.</p>
+        <div class="link-row">
+          <a class="btn" href="#contact" data-target="contact">Связаться</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAPSULE PAGE (in-page detailed block) -->
+    <section id="capsule" class="container-section" style="max-width:1100px;margin:40px auto 0;">
+      <div class="card reveal" style="padding:28px;">
+        <div class="meta">Project</div>
+        <h3>Capsule — маркетплейс NFT</h3>
+        <p>Capsule — это маркетплейс NFT-активов с фокусом на Telegram-интеграции: быстрое выставление, приём подарков, управление коллекцией и торговля. Построен как платформа для легкой монетизации и обмена цифровыми активами.</p>
+        <div style="height:16px;"></div>
+        <ul class="small" style="margin:0 0 12px 18px;">
+          <li>Telegram-ориентированная покупка/продажа</li>
+          <li>Прозрачный UI с glass-карточками</li>
+          <li>Поддержка NFT-подарков и выгрузки на маркетплейс</li>
+        </ul>
+        <div style="display:flex;gap:10px;">
+          <a class="btn primary" href="#contact" data-target="contact">Связаться по Capsule</a>
+          <a class="btn" href="https://t.me/tonlager" target="_blank">Написать в Telegram</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- OCTOPUS PAGE -->
+    <section id="octopus" class="container-section" style="max-width:1100px;margin:40px auto 0;">
+      <div class="card reveal" style="padding:28px;">
+        <div class="meta">Project</div>
+        <h3>Octopus — бот</h3>
+        <p>Octopus — бот с сильной историей на форумах Endway и Lolz, известный своей эффективностью в социальной инженерии и автоматизации взаимодействия. Применялся в аналитических задачах и интеграции с Telegram-сервисами.</p>
+        <div style="height:16px;"></div>
+        <div style="display:flex;gap:10px;">
+          <a class="btn primary" href="https://t.me/Gargona_rezerv" target="_blank">Открыть Telegram</a>
+          <a class="btn" href="#contact" data-target="contact">Связаться</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" style="padding-top:40px;">
+      <div class="contact-card reveal">
+        <div>
+          <div style="font-size:15px; color:var(--muted); margin-bottom:6px;">Контакты</div>
+          <div style="font-weight:600; font-size:18px;">Написать в Telegram</div>
+          <div style="height:8px;"></div>
+          <a class="btn primary" href="https://t.me/tonlager" target="_blank" rel="noopener noreferrer">@tonlager</a>
+        </div>
+        <div class="center" style="min-width:260px;">
+          <div class="small">Оперативная связь и обсуждение коллабораций.</div>
+          <div style="height:8px;"></div>
+          <div class="small">Если нужно — могу прислать резюме и технические детали проектов.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer reveal small">© <span id="year"></span> tonlager — Dossier</div>
+
+  </main>
+</div>
+
+<!-- decorative orb -->
+<div class="orb" aria-hidden="true"></div>
+
+<script>
+/* ============================
+   STARFIELD CANVAS
+   ============================ */
+(function(){
+  const canvas = document.getElementById('space');
+  const ctx = canvas.getContext('2d');
+  let w = canvas.width = innerWidth;
+  let h = canvas.height = innerHeight;
+  const stars = [];
+  const STAR_COUNT = Math.min(220, Math.floor((w*h)/8000));
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+
+  function init(){
+    stars.length = 0;
+    for(let i=0;i<STAR_COUNT;i++){
+      stars.push({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        z: rand(0.2,1.6),
+        r: rand(0.2,1.8),
+        vx: rand(-0.02,0.02),
+        vy: rand(-0.02,0.02),
+        alpha: rand(0.05,0.9)
+      });
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    // subtle noise background
+    for(let i=0;i<stars.length;i++){
+      const s = stars[i];
+      s.x += s.vx * s.z;
+      s.y += s.vy * s.z;
+      // wrap
+      if(s.x < -20) s.x = w + 20;
+      if(s.x > w + 20) s.x = -20;
+      if(s.y < -20) s.y = h + 20;
+      if(s.y > h + 20) s.y = -20;
+
+      const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*6);
+      const col = Math.floor(200 + 55 * s.z);
+      grd.addColorStop(0, 'rgba('+col+','+col+','+255+', '+s.alpha+')');
+      grd.addColorStop(0.3, 'rgba('+col+','+col+','+255+', '+(s.alpha*0.5)+')');
+      grd.addColorStop(1, 'rgba(20,20,30,0)');
+      ctx.beginPath();
+      ctx.fillStyle = grd;
+      ctx.arc(s.x, s.y, s.r*2.4, 0, Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  init();
+  draw();
+  window.addEventListener('resize', () => {
+    w = canvas.width = innerWidth;
+    h = canvas.height = innerHeight;
+    init();
+  });
+})();
+
+/* ============================
+   NAV & ROUTING (single-file navigation)
+   ============================ */
+(function(){
+  const links = document.querySelectorAll('[data-target]');
+  const navAnchors = document.querySelectorAll('.nav a');
+  const sections = {
+    home: document.getElementById('home'),
+    capsule: document.getElementById('capsule'),
+    octopus: document.getElementById('octopus'),
+    contact: document.getElementById('contact'),
+  };
+  function setActive(name){
+    navAnchors.forEach(a => a.classList.toggle('active', a.dataset.target === name));
+    // reveal target
+    const targetEl = sections[name] || document.getElementById(name);
+    if(targetEl){
+      targetEl.scrollIntoView({behavior:'smooth', block:'center'});
+      // add reveal class to children
+      setTimeout(()=> {
+        targetEl.querySelectorAll('.reveal').forEach((el,i) => {
+          el.classList.add('in');
+        });
+      }, 120);
+    }
+  }
+  links.forEach(btn=>{
+    btn.addEventListener('click', ev=>{
+      ev.preventDefault();
+      const name = btn.dataset.target || (btn.getAttribute('href')||'').replace('#','') || 'home';
+      setActive(name);
+      history.replaceState(null, '', '#'+name);
+    });
+  });
+
+  // nav anchors click anchors
+  document.querySelectorAll('.nav a').forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const name = a.dataset.target;
+      setActive(name);
+    });
+  });
+
+  // initial route
+  const hash = (location.hash||'#home').replace('#','') || 'home';
+  setTimeout(()=>setActive(hash), 80);
+
+})();
+
+/* ============================
+   INTERACTIVITY - tilt card, parallax
+   ============================ */
+(function(){
+  const card = document.getElementById('profileCard');
+  if(!card) return;
+  const rect = ()=>card.getBoundingClientRect();
+
+  card.addEventListener('pointermove', (e)=>{
+    const r = rect();
+    const cx = r.left + r.width/2;
+    const cy = r.top + r.height/2;
+    const dx = (e.clientX - cx) / r.width;
+    const dy = (e.clientY - cy) / r.height;
+    const rx = dy * -8;
+    const ry = dx * 12;
+    card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(10px)`;
+    card.style.boxShadow = `0 18px 40px rgba(2,6,23,0.6), 0 6px 30px rgba(100,60,200,0.08)`;
+  });
+  card.addEventListener('pointerleave', ()=>{
+    card.style.transform = '';
+    card.style.boxShadow = '';
+  });
+})();
+
+/* ============================
+   REVEAL ON SCROLL
+   ============================ */
+(function(){
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+      }
+    });
+  }, {threshold: 0.12});
+  reveals.forEach(r=>obs.observe(r));
+})();
+
+/* ============================
+   Small dynamic touches
+   ============================ */
+(function(){
+  // year footer
+  document.getElementById('year').textContent = (new Date()).getFullYear();
+
+  // subtle gentle float for orb according to mouse pos
+  const orb = document.querySelector('.orb');
+  window.addEventListener('mousemove', (e)=>{
+    const w = innerWidth, h = innerHeight;
+    const nx = (e.clientX / w - 0.5) * 16;
+    const ny = (e.clientY / h - 0.5) * 12;
+    if(orb) orb.style.transform = `translate3d(${nx}px, ${ny}px, 0)`;
+  });
+
+  // keyboard quick navigation (1-4)
+  window.addEventListener('keydown', (e)=>{
+    if(['1','2','3','4'].includes(e.key)){
+      const map = { '1':'home','2':'capsule','3':'octopus','4':'contact' };
+      const tgt = map[e.key];
+      if(tgt){
+        document.querySelector('[data-target="'+tgt+'"]').click();
+      }
+    }
+  });
+})();
+
+</script>
+</body>
+</html>
